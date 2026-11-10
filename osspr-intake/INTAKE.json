@@ -1,0 +1,44 @@
+[
+  {
+    "upstream_repo": "omicverse/omicverse",
+    "head_sha": "9fa7af348700f2abdb258d055004ea92ace93264",
+    "file": "omicverse/space/_neighborhood.py",
+    "function": "sepal",
+    "native_test_cmd": "pytest tests/space/test_neighborhood.py::test_sepal_refuses_a_graph_that_is_not_a_lattice tests/space/test_neighborhood.py::test_sepal_rejects_an_unsupported_lattice tests/space/test_svg_selection_contract.py::test_sepal_accepts_radius_lattice_independent_of_graph_metadata tests/space/test_svg_selection_contract.py::test_sepal_rejects_overconnected_graph_without_metadata",
+    "bench_cmd": "python osspr-intake/harness/bench_sepal.py",
+    "baseline_median_ms": 3035.315824,
+    "baseline_noise_pct": 1.6635,
+    "tests_pass_on_baseline": true,
+    "workload": "40x40 square lattice (1600 spots) and 48 genes, Poisson counts with a spatial block in 16 genes, default diffusion step until entropy settles.",
+    "notes": "Each gene is diffused in its own Python loop over the same lattice stencil. One batched update across genes keeps the per-gene entropy stop and the scores, and removes that interpreter loop."
+  },
+  {
+    "upstream_repo": "omicverse/omicverse",
+    "head_sha": "9fa7af348700f2abdb258d055004ea92ace93264",
+    "file": "omicverse/pp/experimental/_highly_variable_genes.py",
+    "function": "_calculate_res_sparse",
+    "native_test_cmd": "pytest tests/pp/test_pearson_precompute_fusion.py",
+    "bench_cmd": "python osspr-intake/harness/bench_pearson_res.py",
+    "baseline_median_ms": 1869.241576,
+    "baseline_noise_pct": 0.8432,
+    "tests_pass_on_baseline": true,
+    "workload": "20000 cells by 10000 genes, CSC integer counts at 4% density, theta=100, clip=sqrt(n_cells).",
+    "notes": "The Numba kernel visits every cell for every gene, twice, including structural zeros. A nonzero scan plus the closed form for zero counts (the same approach as the C++ kernel in this file) keeps residual variances and scales with stored entries."
+  },
+  {
+    "upstream_repo": "omicverse/omicverse",
+    "head_sha": "9fa7af348700f2abdb258d055004ea92ace93264",
+    "file": "omicverse/space/_neighborhood.py",
+    "function": "nhood_enrichment",
+    "native_test_cmd": "pytest tests/space/test_neighborhood.py::test_segregated_types_are_enriched_with_themselves tests/space/test_neighborhood.py::test_nhood_enrichment_is_reproducible_under_a_seed",
+    "bench_cmd": "python osspr-intake/harness/bench_nhood_peakmem.py",
+    "metric_kind": "peak_memory_bytes",
+    "baseline_value": 162314410,
+    "baseline_noise_pct": 0.00005606,
+    "metric_benchmark": "python osspr-intake/harness/bench_nhood_peakmem.py",
+    "labeled_data": null,
+    "tests_pass_on_baseline": true,
+    "workload": "10000 spots, 100 cell types, 6-NN spatial graph (70610 stored edges), 1000 label permutations.",
+    "notes": "tracemalloc peak during the call is the (1000, 100, 100) float64 permutation tensor plus the full-size residual buffer inside std. Online mean and variance over the same shuffles return the same z-scores without those two buffers."
+  }
+]
